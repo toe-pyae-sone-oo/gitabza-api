@@ -2,7 +2,7 @@
 
 const mongoose = require('mongoose')
 
-const SongSchema = new mongoose.Schema({
+const songSchema = new mongoose.Schema({
   uuid: {
     type: String,
     index: { unique: true },
@@ -37,9 +37,13 @@ const SongSchema = new mongoose.Schema({
   versionKey: false,
 })
 
-SongSchema.index({ 'created_at': -1 })
-SongSchema.index({ 'updated_at': -1 })
+songSchema.index({ 'created_at': -1 })
+songSchema.index({ 'updated_at': -1 })
 
-const Song = mongoose.model('songs', SongSchema)
+songSchema.statics.findBySlug = function(slug) {
+  return this.findOne({ slug })
+}
+
+const Song = mongoose.model('songs', songSchema)
 
 module.exports = Song
