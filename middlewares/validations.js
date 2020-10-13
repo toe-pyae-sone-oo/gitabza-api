@@ -15,6 +15,13 @@ const validateSongForm = form(
   field('youtube'),
 )
 
+const validateArtistForm = form(
+  field('name').required().trim(),
+  field('slug').required().trim(),
+  field('picture'),
+)
+
 module.exports = {
   validateSongForm,
+  validateArtistForm,
 }
