@@ -46,4 +46,21 @@ router.post('/', validateArtistForm, async (req, res, next) => {
   }
 })
 
+router.get('/', async (req, res) => {
+  const { 
+    skip = 0, limit = 10, 
+    sort = 'created_at', order = 'desc' 
+  } = req.query
+
+  const artists = await Artist
+    .find({})
+    .limit(parseInt(limit))
+    .skip(parseInt(skip))
+    .sort({ [sort]: order === 'asc' ? 1 : -1 })
+    .select({ _id: 0 })
+    .exec()
+
+  return res.status(200).json(artists)
+})
+
 module.exports = router
