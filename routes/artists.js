@@ -52,6 +52,8 @@ router.get('/', async (req, res) => {
     sort = 'created_at', order = 'desc' 
   } = req.query
 
+  const count = await Artist.find({}).count().exec()
+
   const artists = await Artist
     .find({})
     .limit(parseInt(limit))
@@ -60,7 +62,7 @@ router.get('/', async (req, res) => {
     .select({ _id: 0 })
     .exec()
 
-  return res.status(200).json(artists)
+  return res.status(200).json({ artists, count })
 })
 
 module.exports = router
