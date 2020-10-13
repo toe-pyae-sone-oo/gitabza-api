@@ -32,6 +32,10 @@ artistSchema.statics.findBySlug = function(slug) {
   return this.findOne({ slug })
 }
 
+artistSchema.statics.findByName = function(name) {
+  return this.find(name ? { name: new RegExp(name, 'i') } : {})
+}
+
 const Artist = mongoose.model('artists', artistSchema)
 
 module.exports = Artist

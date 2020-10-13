@@ -49,13 +49,14 @@ router.post('/', validateArtistForm, async (req, res, next) => {
 router.get('/', async (req, res) => {
   const { 
     skip = 0, limit = 10, 
-    sort = 'created_at', order = 'desc' 
+    sort = 'created_at', order = 'desc',
+    name = undefined,
   } = req.query
 
-  const count = await Artist.find({}).count().exec()
+  const count = await Artist.findByName(name).count().exec()
 
   const artists = await Artist
-    .find({})
+    .findByName(name)
     .limit(parseInt(limit))
     .skip(parseInt(skip))
     .sort({ [sort]: order === 'asc' ? 1 : -1 })
