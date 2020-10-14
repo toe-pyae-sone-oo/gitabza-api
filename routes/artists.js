@@ -6,7 +6,7 @@ const { imageFilter } = require('../helpers')
 const { handleSingleFileUpload } = require('../middlewares/fileupload')
 const { validateArtistForm } = require('../middlewares/validations')
 const { artistsPicStorage: storage } = require('../helpers/artists')
-const { delay } = require('../common/utils')
+const { delay, deepCopy } = require('../common/utils')
 const Artist = require('../models/artists')
 
 router.post('/upload/pic', handleSingleFileUpload(storage, imageFilter, 'picture'), (req, res, next) => {
@@ -100,6 +100,39 @@ router.get('/:uuid', async (req, res, next) => {
     console.error(err)
     return next(error(500, 'something went wrong'))
   }
+})
+
+router.put('/:uuid', validateArtistForm, async (req, res, next) => {
+
+  if (!req.form.isValid) {
+    return next(error(400, req.form.errors))
+  }
+
+  await delay(3000)
+
+  try { 
+    const { uuid } = req.params
+    
+    const found = await Artist.findBySlug(req.form.slug)
+    if (found && found.uuid !== uuid) {
+      return next(error(422, 'slug already exists'))
+    }
+
+    const payload = deepCopy(req.form) // remove undefined fields
+
+    console.log({...payload})
+
+    await Artist.findOneAndUpdate({ uuid }, { ...payload }).lean().exec()
+
+    const artist = await Artist.findByUUID(uuid)
+      .select({ '_id': 0 }).lean()
+    return res.status(200).json(artist)
+
+  } catch (err) {
+    console.error(err)
+    return next(error(500, 'something went wrong'))
+  }
+  
 })
 
 module.exports = router
