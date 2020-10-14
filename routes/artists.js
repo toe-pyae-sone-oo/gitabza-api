@@ -85,4 +85,21 @@ router.delete('/:uuid', async (req, res, next) => {
   }
 })
 
+router.get('/:uuid', async (req, res, next) => {
+  await delay(3000)
+  const { uuid } = req.params
+  try {
+    const artist = await Artist
+      .findByUUID(uuid)
+      .select({ '_id': 0 })
+      .lean()
+      .exec()
+    if (!artist) { return next(error(404, 'artist not found')) }
+    return res.status(200).json(artist)
+  } catch (err) {
+    console.error(err)
+    return next(error(500, 'something went wrong'))
+  }
+})
+
 module.exports = router
