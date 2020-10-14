@@ -15,6 +15,8 @@ const artistsRouter = require('./routes/artists')
 
 var app = express();
 
+const { delay } = require('./common/utils')
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
@@ -25,6 +27,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// TODO: remove later
+// middleware to delay response
+// for testing
+app.use(async (req, res, next) => {
+  await delay(3000)
+  next()
+})
 
 app.use('/', indexRouter);
 app.use('/songs', songsRouter)

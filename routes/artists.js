@@ -6,7 +6,7 @@ const { imageFilter } = require('../helpers')
 const { handleSingleFileUpload } = require('../middlewares/fileupload')
 const { validateArtistForm } = require('../middlewares/validations')
 const { artistsPicStorage: storage } = require('../helpers/artists')
-const { delay, deepCopy } = require('../common/utils')
+const { deepCopy } = require('../common/utils')
 const Artist = require('../models/artists')
 
 router.post('/upload/pic', handleSingleFileUpload(storage, imageFilter, 'picture'), (req, res, next) => {
@@ -25,10 +25,6 @@ router.post('/', validateArtistForm, async (req, res, next) => {
   }
 
   try {
-    // TODO: remove later
-    // just for testing
-    await delay(3000)
-
     const found = await Artist.findBySlug(req.form.slug).lean().exec()
     if (found) {
       return next(error(422, 'slug already exists'))
@@ -48,9 +44,6 @@ router.post('/', validateArtistForm, async (req, res, next) => {
 })
 
 router.get('/', async (req, res) => {
-  
-  await delay(3000)
-
   const { 
     skip = 0, limit = 10, 
     sort = 'created_at', order = 'desc',
@@ -71,11 +64,7 @@ router.get('/', async (req, res) => {
 })
 
 router.delete('/:uuid', async (req, res, next) => {
-
-  await delay(3000)
-  
   const { uuid } = req.params
-
   try {
     await Artist.deleteOne({ uuid }).exec()
     res.status(200).json({ message: 'success' })
@@ -86,7 +75,6 @@ router.delete('/:uuid', async (req, res, next) => {
 })
 
 router.get('/:uuid', async (req, res, next) => {
-  await delay(3000)
   const { uuid } = req.params
   try {
     const artist = await Artist
@@ -103,12 +91,9 @@ router.get('/:uuid', async (req, res, next) => {
 })
 
 router.put('/:uuid', validateArtistForm, async (req, res, next) => {
-
   if (!req.form.isValid) {
     return next(error(400, req.form.errors))
   }
-
-  await delay(3000)
 
   try { 
     const { uuid } = req.params
@@ -132,7 +117,6 @@ router.put('/:uuid', validateArtistForm, async (req, res, next) => {
     console.error(err)
     return next(error(500, 'something went wrong'))
   }
-  
 })
 
 module.exports = router
