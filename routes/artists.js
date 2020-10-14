@@ -42,11 +42,15 @@ router.post('/', validateArtistForm, async (req, res, next) => {
     return res.status(201).json(newArtist)
 
   } catch (err) {
-    return next(error(500, err.message))
+    console.error(err)
+    return next(error(500, 'something went wrong'))
   }
 })
 
 router.get('/', async (req, res) => {
+  
+  await delay(3000)
+
   const { 
     skip = 0, limit = 10, 
     sort = 'created_at', order = 'desc',
@@ -64,6 +68,21 @@ router.get('/', async (req, res) => {
     .exec()
 
   return res.status(200).json({ artists, count })
+})
+
+router.delete('/:uuid', async (req, res, next) => {
+
+  await delay(3000)
+  
+  const { uuid } = req.params
+
+  try {
+    await Artist.deleteOne({ uuid }).exec()
+    res.status(200).json({ message: 'success' })
+  } catch (err) {
+    console.error(err)
+    return next(error(500, 'something went wrong'))
+  }
 })
 
 module.exports = router
