@@ -124,4 +124,18 @@ router.put('/:uuid', validateArtistForm, async (req, res, next) => {
   }
 })
 
+// get all artist uuids and names
+router.get('/all/names', async (req, res, next) => {
+  try { 
+    const artists = await Artist
+      .find({})
+      .select({ uuid: 1, name: 1, '_id': 0 })
+      .lean()
+    res.status(200).json(artists)
+  } catch (err) {
+    console.error(err)
+    return next(error(500, 'something went wrong'))
+  }
+})
+
 module.exports = router
