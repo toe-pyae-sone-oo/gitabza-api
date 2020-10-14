@@ -7,6 +7,7 @@ const { handleSingleFileUpload } = require('../middlewares/fileupload')
 const { validateArtistForm } = require('../middlewares/validations')
 const { artistsPicStorage: storage } = require('../helpers/artists')
 const { deepCopy } = require('../common/utils')
+const { UPLOAD_FILES_URL } = require('../common/constants')
 const Artist = require('../models/artists')
 
 router.post('/upload/pic', handleSingleFileUpload(storage, imageFilter, 'picture'), (req, res, next) => {
@@ -83,7 +84,14 @@ router.get('/:uuid', async (req, res, next) => {
       .lean()
       .exec()
     if (!artist) { return next(error(404, 'artist not found')) }
-    return res.status(200).json(artist)
+
+    const _artist = {
+      ...artist,
+      picture: artist.picture 
+        ? `${UPLOAD_FILES_URL}/${artist.picture}`
+        : artist.picture
+    }
+    return res.status(200).json(_artist)
   } catch (err) {
     console.error(err)
     return next(error(500, 'something went wrong'))
