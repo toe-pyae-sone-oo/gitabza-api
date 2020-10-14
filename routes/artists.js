@@ -112,9 +112,6 @@ router.put('/:uuid', validateArtistForm, async (req, res, next) => {
     }
 
     const payload = deepCopy(req.form) // remove undefined fields
-
-    console.log({...payload})
-
     await Artist.findOneAndUpdate({ uuid }, { ...payload }).lean().exec()
 
     const artist = await Artist.findByUUID(uuid)

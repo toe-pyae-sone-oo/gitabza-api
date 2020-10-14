@@ -44,6 +44,14 @@ songSchema.statics.findBySlug = function(slug) {
   return this.findOne({ slug })
 }
 
+songSchema.statics.findByTitle = function(title) {
+  return this.find(title ? { title: new RegExp(title, 'i') } : {})
+}
+
+songSchema.statics.findByUUID = function(uuid) {
+  return this.findOne({ uuid })
+}
+
 const Song = mongoose.model('songs', songSchema)
 
 module.exports = Song

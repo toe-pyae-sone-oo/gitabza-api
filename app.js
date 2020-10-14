@@ -32,7 +32,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // middleware to delay response
 // for testing
 app.use(async (req, res, next) => {
-  await delay(3000)
+  await delay(1000)
   next()
 })
 
