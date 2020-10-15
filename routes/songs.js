@@ -4,7 +4,7 @@ const { v4: uuid } = require('uuid')
 const Song = require('../models/songs')
 const { validateSongForm } = require('../middlewares/validations')
 const { error } = require('../common/errors')
-const { delay, deepCopy } = require('../common/utils')
+const { deepCopy } = require('../common/utils')
 
 router.post('/', validateSongForm, async (req, res, next) => {
   if (!req.form.isValid) {
@@ -12,10 +12,6 @@ router.post('/', validateSongForm, async (req, res, next) => {
   }
 
   try {
-    // TODO: remove later
-    // just for testing
-    await delay(5000)
-
     const found = await Song.findBySlug(req.form.slug).lean().exec()
     if (found) { 
       return next(error(422, 'slug already exists')) 

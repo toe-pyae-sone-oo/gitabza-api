@@ -1,6 +1,7 @@
 'use strict'
 
 require('./setup')
+require('./auth/auth')
 
 var createError = require('http-errors');
 var express = require('express');
@@ -12,6 +13,7 @@ const cors = require('cors')
 var indexRouter = require('./routes/index');
 const songsRouter = require('./routes/songs')
 const artistsRouter = require('./routes/artists')
+const adminRouter = require('./routes/admin')
 
 var app = express();
 
@@ -39,6 +41,7 @@ app.use(async (req, res, next) => {
 app.use('/', indexRouter);
 app.use('/songs', songsRouter)
 app.use('/artists', artistsRouter)
+app.use('/admin', adminRouter)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -55,7 +58,11 @@ app.use(function(err, req, res, next) {
   // res.status(err.status || 500);
   // res.render('error');
 
-  res.status(err.status || 500).json({ message: err.message })
+  const message = err && err.message 
+    ? err.message.toLowerCase() 
+    : 'something went wrong'
+
+  res.status(err.status || 500).json({ message })
 });
 
 module.exports = app;
