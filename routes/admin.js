@@ -18,7 +18,7 @@ router.post('/login', async (req, res, next) => {
       req.login(user, { session: false }, async err => {
         if (err) return next(error(401, 'unauthorized'))
         const body = { uuid: user.uuid, username: user.username }
-        const token = jwt.sign({ user: body }, JWT_SECRET) // TODO: get secret from env
+        const token = jwt.sign({ user: body }, JWT_SECRET, { expiresIn: '30m' }) // TODO: get secret from env
         return res.status(200).json({ token })
       })
     } catch (err) {
