@@ -15,7 +15,7 @@ passport.use('admin_login', new localStrategy(
 
       const admin = await Admin.findOne({ username })
       if (!admin) {
-        return done(null, false, { message: 'admin not found' })
+        return done(null, false, { message: 'user not found' })
       }
 
       const validate = await admin.isValidPassword(password)
