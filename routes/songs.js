@@ -78,6 +78,8 @@ router.get('/latest', async (req, res, next) => {
             $in: song.artists
           }
         })
+          .limit(20)
+          .sort({ created_at: -1 })
           .select({ name: 1 })
           .lean()
         song.artists = artists.map(({ name }) => name)
