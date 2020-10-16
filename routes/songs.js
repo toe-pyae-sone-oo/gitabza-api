@@ -3,10 +3,11 @@ const router = express.Router()
 const { v4: uuid } = require('uuid')
 const Song = require('../models/songs')
 const { validateSongForm } = require('../middlewares/validations')
+const { isAdmin } = require('../middlewares/auth')
 const { error } = require('../common/errors')
 const { deepCopy } = require('../common/utils')
 
-router.post('/', validateSongForm, async (req, res, next) => {
+router.post('/', isAdmin, validateSongForm, async (req, res, next) => {
   if (!req.form.isValid) {
     return next(error(400, req.form.errors))
   }
@@ -52,7 +53,7 @@ router.get('/', async (req, res, next) => {
   }
 })
 
-router.delete('/:uuid', async (req, res, next) => {
+router.delete('/:uuid', isAdmin, async (req, res, next) => {
   const { uuid } = req.params
   try {
     await Song.deleteOne({ uuid })
@@ -74,7 +75,7 @@ router.get('/:uuid', async (req, res, next) => {
   }
 })
 
-router.put('/:uuid', validateSongForm, async (req, res, next) => {
+router.put('/:uuid', isAdmin, validateSongForm, async (req, res, next) => {
   if (!req.form.isValid) { 
     return next(error(400, req.form.errors)) 
   }

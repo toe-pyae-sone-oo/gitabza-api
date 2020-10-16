@@ -5,12 +5,13 @@ const { error } = require('../common/errors')
 const { imageFilter } = require('../helpers')
 const { handleSingleFileUpload } = require('../middlewares/fileupload')
 const { validateArtistForm } = require('../middlewares/validations')
+const { isAdmin } = require('../middlewares/auth')
 const { artistsPicStorage: storage } = require('../helpers/artists')
 const { deepCopy } = require('../common/utils')
 const { UPLOAD_FILES_URL } = require('../common/constants')
 const Artist = require('../models/artists')
 
-router.post('/upload/pic', handleSingleFileUpload(storage, imageFilter, 'picture'), (req, res, next) => {
+router.post('/upload/pic', isAdmin, handleSingleFileUpload(storage, imageFilter, 'picture'), (req, res, next) => {
   if (req.fileValidationError) {
     return next(error(400, req.fileValidationError))
   } 
@@ -20,7 +21,7 @@ router.post('/upload/pic', handleSingleFileUpload(storage, imageFilter, 'picture
   res.json({ file: req.file.filename })
 })
 
-router.post('/', validateArtistForm, async (req, res, next) => {
+router.post('/', isAdmin, validateArtistForm, async (req, res, next) => {
   if (!req.form.isValid) {
     return next(error(400, req.form.errors))
   }
@@ -64,7 +65,7 @@ router.get('/', async (req, res) => {
   return res.status(200).json({ artists, count })
 })
 
-router.delete('/:uuid', async (req, res, next) => {
+router.delete('/:uuid', isAdmin, async (req, res, next) => {
   const { uuid } = req.params
   try {
     await Artist.deleteOne({ uuid }).exec()
@@ -98,7 +99,7 @@ router.get('/:uuid', async (req, res, next) => {
   }
 })
 
-router.put('/:uuid', validateArtistForm, async (req, res, next) => {
+router.put('/:uuid', isAdmin, validateArtistForm, async (req, res, next) => {
   if (!req.form.isValid) {
     return next(error(400, req.form.errors))
   }
@@ -125,7 +126,7 @@ router.put('/:uuid', validateArtistForm, async (req, res, next) => {
 })
 
 // get all artist uuids and names
-router.get('/all/names', async (req, res, next) => {
+router.get('/all/names', isAdmin, async (req, res, next) => {
   try { 
     const artists = await Artist
       .find({})
