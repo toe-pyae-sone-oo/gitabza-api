@@ -76,6 +76,20 @@ router.delete('/:uuid', isAdmin, async (req, res, next) => {
   }
 })
 
+// get all artist uuids and names
+router.get('/names', isAdmin, async (req, res, next) => {
+  try { 
+    const artists = await Artist
+      .find({})
+      .select({ uuid: 1, name: 1, '_id': 0 })
+      .lean()
+    res.status(200).json(artists)
+  } catch (err) {
+    console.error(err)
+    return next(error(500, 'something went wrong'))
+  }
+})
+
 router.get('/:uuid', async (req, res, next) => {
   const { uuid } = req.params
   try {
@@ -119,20 +133,6 @@ router.put('/:uuid', isAdmin, validateArtistForm, async (req, res, next) => {
       .select({ '_id': 0 }).lean()
     return res.status(200).json(artist)
 
-  } catch (err) {
-    console.error(err)
-    return next(error(500, 'something went wrong'))
-  }
-})
-
-// get all artist uuids and names
-router.get('/all/names', isAdmin, async (req, res, next) => {
-  try { 
-    const artists = await Artist
-      .find({})
-      .select({ uuid: 1, name: 1, '_id': 0 })
-      .lean()
-    res.status(200).json(artists)
   } catch (err) {
     console.error(err)
     return next(error(500, 'something went wrong'))
