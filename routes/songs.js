@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const { v4: uuid } = require('uuid')
 const Song = require('../models/songs')
+const Artist = require('../models/artists')
 const { validateSongForm } = require('../middlewares/validations')
 const { isAdmin } = require('../middlewares/auth')
 const { error } = require('../common/errors')
@@ -61,6 +62,33 @@ router.delete('/:uuid', isAdmin, async (req, res, next) => {
   } catch (err) {
     console.error(err)
     return next(error(500, 'something went wrong'))
+  }
+})
+
+router.get('/latest', async (req, res, next) => {
+  try {
+    const songs = await Song.find({})
+      .select({ _id: 0 })
+      .lean()
+    
+    for (let song of songs) {
+      if (song.artists.length > 0) {
+        const artists = await Artist.find({
+          uuid: {
+            $in: song.artists
+          }
+        })
+          .select({ name: 1 })
+          .lean()
+        song.artists = artists.map(({ name }) => name)
+      }
+    }
+
+    return res.status(200).json(songs)
+    
+  } catch (err) {
+    console.error(err)
+    next(error(500, 'something went wrong'))
   }
 })
 
