@@ -81,6 +81,7 @@ router.get('/names', isAdmin, async (req, res, next) => {
   try { 
     const artists = await Artist
       .find({})
+      .sort({ name: 1 })
       .select({ uuid: 1, name: 1, '_id': 0 })
       .lean()
     res.status(200).json(artists)
