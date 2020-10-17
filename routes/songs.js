@@ -84,6 +84,15 @@ router.get('/latest', async (req, res, next) => {
           .lean()
         song.artists = artists.map(({ name }) => name)
       }
+      
+      // youtube image
+      if (song.youtube) {
+        const url = new URL(song.youtube)
+        const q = url.searchParams
+        song.image = q.has('v') 
+          ? `https://img.youtube.com/vi/${q.get('v')}/hqdefault.jpg`
+          : undefined
+      }
     }
 
     return res.status(200).json(songs)
