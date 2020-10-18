@@ -47,6 +47,27 @@ router.get('/', async (req, res, next) => {
       .skip(parseInt(skip))
       .sort({ [sort]: order === 'asc' ? 1 : -1 })
       .select({ _id: 0 })
+      .lean()
+    for (let song of songs) {
+      if (song.artists.length > 0) {
+        const artists = await Artist.find({
+          uuid: {
+            $in: song.artists,
+          }
+        })
+          .select({ name: 1 })
+          .lean()
+        song.artists = artists.map(({ name }) => name)
+      }
+      // youtube image
+      if (song.youtube) {
+        const url = new URL(song.youtube)
+        const q = url.searchParams
+        song.image = q.has('v') 
+          ? `https://img.youtube.com/vi/${q.get('v')}/hqdefault.jpg`
+          : undefined
+      }
+    }
     return res.status(200).json({ songs, count })
   } catch (err) {
     console.error(err)
@@ -62,44 +83,6 @@ router.delete('/:uuid', isAdmin, async (req, res, next) => {
   } catch (err) {
     console.error(err)
     return next(error(500, 'something went wrong'))
-  }
-})
-
-router.get('/latest', async (req, res, next) => {
-  try {
-    const songs = await Song.find({})
-      .select({ _id: 0 })
-      .lean()
-    
-    for (let song of songs) {
-      if (song.artists.length > 0) {
-        const artists = await Artist.find({
-          uuid: {
-            $in: song.artists
-          }
-        })
-          .limit(20)
-          .sort({ created_at: -1 })
-          .select({ name: 1 })
-          .lean()
-        song.artists = artists.map(({ name }) => name)
-      }
-      
-      // youtube image
-      if (song.youtube) {
-        const url = new URL(song.youtube)
-        const q = url.searchParams
-        song.image = q.has('v') 
-          ? `https://img.youtube.com/vi/${q.get('v')}/hqdefault.jpg`
-          : undefined
-      }
-    }
-
-    return res.status(200).json(songs)
-    
-  } catch (err) {
-    console.error(err)
-    next(error(500, 'something went wrong'))
   }
 })
 
