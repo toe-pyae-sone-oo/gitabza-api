@@ -7,6 +7,8 @@ const { validateSongForm } = require('../middlewares/validations')
 const { isAdmin } = require('../middlewares/auth')
 const { error } = require('../common/errors')
 const { deepCopy } = require('../common/utils')
+const { getArtistNames } = require('../helpers/artists')
+const { getYoutubeImage } = require('../helpers/songs')
 
 router.post('/', isAdmin, validateSongForm, async (req, res, next) => {
   if (!req.form.isValid) {
@@ -49,24 +51,13 @@ router.get('/', async (req, res, next) => {
       .select({ _id: 0 })
       .lean()
     for (let song of songs) {
-      if (song.artists.length > 0) {
-        const artists = await Artist.find({
-          uuid: {
-            $in: song.artists,
-          }
-        })
-          .select({ name: 1 })
-          .lean()
-        song.artists = artists.map(({ name }) => name)
-      }
-      // youtube image
-      if (song.youtube) {
-        const url = new URL(song.youtube)
-        const q = url.searchParams
-        song.image = q.has('v') 
-          ? `https://img.youtube.com/vi/${q.get('v')}/hqdefault.jpg`
-          : undefined
-      }
+      song.artists = song.artists.length > 0 
+        ? await getArtistNames(song.artists) 
+        : []
+
+      song.image = song.youtube 
+        ? getYoutubeImage(song.youtube) 
+        : undefined
     }
     return res.status(200).json({ songs, count })
   } catch (err) {

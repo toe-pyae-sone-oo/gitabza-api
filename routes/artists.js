@@ -3,6 +3,8 @@ const router = express.Router()
 const { v4: uuid } = require('uuid')
 const { error } = require('../common/errors')
 const { imageFilter } = require('../helpers')
+const { getArtistNames } = require('../helpers/artists')
+const { getYoutubeImage } = require('../helpers/songs')
 const { handleSingleFileUpload } = require('../middlewares/fileupload')
 const { validateArtistForm } = require('../middlewares/validations')
 const { isAdmin } = require('../middlewares/auth')
@@ -120,6 +122,32 @@ router.get('/:uuid', async (req, res, next) => {
       songs,
     }
     return res.status(200).json(_artist)
+  } catch (err) {
+    console.error(err)
+    return next(error(500, 'something went wrong'))
+  }
+})
+
+router.get('/:uuid/songs', async (req, res, next) => {
+  const { uuid } = req.params
+  try {
+    const songs = await Song
+      .findByArtist(uuid)
+      .sort({ title: 1 })
+      .select({ '_id': 0 })
+      .lean()
+
+    for (let song of songs) {
+      song.artists = song.artists.length > 0 
+        ? await getArtistNames(song.artists) 
+        : []
+
+      song.image = song.youtube 
+        ? getYoutubeImage(song.youtube) 
+        : undefined
+    }
+
+    return res.status(200).json(songs)
   } catch (err) {
     console.error(err)
     return next(error(500, 'something went wrong'))
