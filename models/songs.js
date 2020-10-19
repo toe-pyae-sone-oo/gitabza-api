@@ -52,6 +52,10 @@ songSchema.statics.findByUUID = function(uuid) {
   return this.findOne({ uuid })
 }
 
+songSchema.statics.findByArtist = function(artist) {
+  return this.find({ artists: artist })
+}
+
 const Song = mongoose.model('songs', songSchema)
 
 module.exports = Song

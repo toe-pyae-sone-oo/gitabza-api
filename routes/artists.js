@@ -10,6 +10,7 @@ const { artistsPicStorage: storage } = require('../helpers/artists')
 const { deepCopy } = require('../common/utils')
 const { UPLOAD_FILES_URL } = require('../common/constants')
 const Artist = require('../models/artists')
+const Song = require('../models/songs')
 
 router.post('/upload/pic', isAdmin, handleSingleFileUpload(storage, imageFilter, 'picture'), (req, res, next) => {
   if (req.fileValidationError) {
@@ -60,7 +61,15 @@ router.get('/', async (req, res) => {
     .skip(parseInt(skip))
     .sort({ [sort]: order === 'asc' ? 1 : -1 })
     .select({ _id: 0 })
+    .lean()
     .exec()
+
+  for (let artist of artists) {
+    if (artist.picture) {
+      artist.picture = `${UPLOAD_FILES_URL}/${artist.picture}`
+    }
+    artist.songs = await Song.findByArtist(artist.uuid).count()
+  }
 
   return res.status(200).json({ artists, count })
 })
@@ -98,14 +107,17 @@ router.get('/:uuid', async (req, res, next) => {
       .findByUUID(uuid)
       .select({ '_id': 0 })
       .lean()
-      .exec()
+
     if (!artist) { return next(error(404, 'artist not found')) }
+
+    const songs = await Song.findByArtist(artist.uuid).count()
 
     const _artist = {
       ...artist,
       picture: artist.picture 
         ? `${UPLOAD_FILES_URL}/${artist.picture}`
-        : artist.picture
+        : artist.picture,
+      songs,
     }
     return res.status(200).json(_artist)
   } catch (err) {
