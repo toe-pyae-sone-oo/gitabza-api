@@ -7,7 +7,7 @@ const { validateSongForm } = require('../middlewares/validations')
 const { isAdmin } = require('../middlewares/auth')
 const { error } = require('../common/errors')
 const { deepCopy } = require('../common/utils')
-const { getArtistNames } = require('../helpers/artists')
+const { getArtistNames, getArtists } = require('../helpers/artists')
 const { getYoutubeImage } = require('../helpers/songs')
 
 router.post('/', isAdmin, validateSongForm, async (req, res, next) => {
@@ -81,6 +81,12 @@ router.get('/:uuid', async (req, res, next) => {
   const { uuid } = req.params
   try {
     const song = await Song.findByUUID(uuid).select({ '_id': 0 }).lean()
+    song.artists = song.artists.length > 0 
+        ? await getArtists(song.artists) 
+        : []
+    song.image = song.youtube 
+      ? getYoutubeImage(song.youtube) 
+      : undefined
     return res.status(200).json(song)
   } catch (err) {
     console.error(err)
