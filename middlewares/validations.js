@@ -7,12 +7,12 @@ const validateSongForm = form(
   field('title').required().trim(),
   field('slug').required().trim(),
   field('artists').required().isArray().minLength(1),
-  field('types'),
-  field('difficulty'),
+  field('types').required().trim(),
+  field('difficulty').required().trim(),
   field('capo'),
-  field('version'),
-  field('lyrics'),
-  field('youtube'),
+  field('version').required().trim(),
+  field('lyrics').required().trim(),
+  field('youtube').required().trim(),
 )
 
 const validateArtistForm = form(
