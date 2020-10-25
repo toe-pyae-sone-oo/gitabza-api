@@ -3,6 +3,7 @@ const passport = require('passport')
 const jwt = require('jsonwebtoken')
 const { error } = require('../common/errors')
 const { JWT_SECRET } = require('../common/constants')
+const { isAdmin } = require('../middlewares/auth')
 
 const router = express.Router()
 
@@ -26,6 +27,10 @@ router.post('/login', async (req, res, next) => {
       return next(error(500, 'something went wrong'))
     }
   })(req, res, next)
+})
+
+router.post('/verify', isAdmin, async (req, res, next) => {
+  res.status(200).json({ message: 'is_authenticated' })
 })
 
 module.exports = router
