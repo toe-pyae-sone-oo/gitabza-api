@@ -77,17 +77,66 @@ router.delete('/:uuid', isAdmin, async (req, res, next) => {
   }
 })
 
+router.get('/slug/:artist/:song', async (req, res, next) => {
+  const { 
+    artist: artistSlug, 
+    song: songSlug 
+  } = req.params
+
+  try {
+
+    const song = await Song.findBySlug(songSlug)
+      .select({ _id: 0 })
+      .lean()
+
+    if (!song) {
+      return next(error(404, 'song not found'))
+    }
+    
+    song.artists = song.artists.length > 0
+      ? await getArtists(song.artists)
+      : []
+
+    const isRelated = song.artists
+      .map(artist => artist.slug)
+      .includes(artistSlug)
+    
+    if (!isRelated) {
+      return next(error(404, 'song not found'))
+    }
+
+    song.image = song.youtube
+      ? getYoutubeImage(song.youtube)
+      : undefined
+
+    return res.status(200).json(song)
+    
+  } catch (err) {
+    console.error(err)
+    return next(error(500, 'something went wrong'))
+  }
+
+})
+
 router.get('/:uuid', async (req, res, next) => {
   const { uuid } = req.params
   try {
     const song = await Song.findByUUID(uuid).select({ '_id': 0 }).lean()
+
+    if (!song) {
+      return next(error(404, 'song not found'))
+    }
+
     song.artists = song.artists.length > 0 
         ? await getArtists(song.artists) 
         : []
+
     song.image = song.youtube 
       ? getYoutubeImage(song.youtube) 
       : undefined
+
     return res.status(200).json(song)
+    
   } catch (err) {
     console.error(err)
     return next(error(500, 'something went wrong'))
