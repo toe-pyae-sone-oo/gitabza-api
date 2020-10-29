@@ -102,6 +102,35 @@ router.get('/names', isAdmin, async (req, res, next) => {
   }
 })
 
+router.get('/slug/:slug', async (req, res, next) => {
+  try { 
+    const { slug } = req.params
+    const artist = await Artist.findBySlug(slug)
+      .select({ _id: 0 })
+      .lean()
+
+    if (!artist) {
+      return next(error(404, 'artist not found'))
+    }
+
+    const songs = await Song.findByArtist(artist.uuid).count()
+
+    const _artist = {
+      ...artist,
+      picture: artist.picture
+        ? `${UPLOAD_FILES_URL}/${artist.picture}`
+        : artist.picture,
+      songs,
+    }
+
+    return res.status(200).json(_artist)
+
+  } catch (err) {
+    console.error(err)
+    return next(error(500, 'something went wrong'))
+  }
+})
+
 router.get('/:uuid', async (req, res, next) => {
   const { uuid } = req.params
   try {
