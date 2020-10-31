@@ -39,11 +39,12 @@ router.get('/', async (req, res, next) => {
     sort = 'created_at',
     order = 'desc',
     title,
+    genre,
   } = req.query 
   
   try {
-    const count = await Song.findByTitle(title).count()
-    const songs = await Song.findByTitle(title)
+    const count = await Song.findByTitleAndGenre(title, genre).count()
+    const songs = await Song.findByTitleAndGenre(title, genre)
       .limit(parseInt(limit))
       .skip(parseInt(skip))
       .sort({ [sort]: order === 'asc' ? 1 : -1 })

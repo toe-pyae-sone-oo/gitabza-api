@@ -60,6 +60,22 @@ songSchema.statics.findByArtist = function(artist) {
   return this.find({ artists: artist })
 }
 
+songSchema.statics.findByTitleAndGenre = function(title, genre) {
+  const query = {}  
+
+  if (title) {
+    query['title'] = new RegExp(title, 'i')
+  }
+
+  if (genre) {
+    query['genre'] = genre
+  }
+
+  console.log(query)
+
+  return this.find(query)
+}
+
 const Song = mongoose.model('songs', songSchema)
 
 module.exports = Song
