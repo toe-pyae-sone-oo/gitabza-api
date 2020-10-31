@@ -23,6 +23,10 @@ const songSchema = new mongoose.Schema({
     index: true,
     required: true,
   },
+  genre: {
+    type: String,
+    index: true,
+  },
   types: String,
   difficulty: String,
   capo: String,
