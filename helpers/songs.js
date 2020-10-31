@@ -1,3 +1,6 @@
+const { v4: uuid } = require('uuid')
+const SongView = require('../models/songviews')
+
 const getYoutubeImage = url => {
   try {
     const _url = new URL(url)
@@ -9,6 +12,34 @@ const getYoutubeImage = url => {
   }
 }
 
+const recordSongVisit = async song_uuid => {
+  const songView = new SongView({ uuid: uuid(), song: song_uuid })
+  const view = await songView.save()
+  return view.toJSON()
+}
+
+const getTopSongs = async () => {
+  return await SongView.aggregate([
+    {
+      $group: {
+        _id: '$song',
+        count: { $sum: 1 }
+      }
+    },
+    {
+      $sort: {
+        count: -1
+      }
+    },
+    {
+      $limit: 20
+    },
+  ])
+    .exec()
+}
+
 module.exports = {
   getYoutubeImage,
+  recordSongVisit,
+  getTopSongs,
 }

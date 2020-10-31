@@ -2,13 +2,12 @@ const express = require('express')
 const router = express.Router()
 const { v4: uuid } = require('uuid')
 const Song = require('../models/songs')
-const Artist = require('../models/artists')
 const { validateSongForm } = require('../middlewares/validations')
 const { isAdmin } = require('../middlewares/auth')
 const { error } = require('../common/errors')
 const { deepCopy } = require('../common/utils')
 const { getArtists } = require('../helpers/artists')
-const { getYoutubeImage } = require('../helpers/songs')
+const { getYoutubeImage, recordSongVisit, getTopSongs } = require('../helpers/songs')
 
 router.post('/', isAdmin, validateSongForm, async (req, res, next) => {
   if (!req.form.isValid) {
@@ -109,6 +108,8 @@ router.get('/slug/:artist/:song', async (req, res, next) => {
       ? getYoutubeImage(song.youtube)
       : undefined
 
+    recordSongVisit(song.uuid)
+
     return res.status(200).json(song)
     
   } catch (err) {
@@ -116,6 +117,50 @@ router.get('/slug/:artist/:song', async (req, res, next) => {
     return next(error(500, 'something went wrong'))
   }
 
+})
+
+router.get('/top', async (req, res, next) => {
+  try {
+
+    const topSongIds = (await getTopSongs()).map(({ _id }) => _id)
+    const topSongs = await Song.find({
+      uuid: {
+        $in: topSongIds
+      }
+    })
+      .select({ '_id': 0 })
+      .lean()
+
+    const latestSongs = await Song.find({
+      uuid: {
+        $not: {
+          $in: topSongIds
+        }
+      }
+    })
+      .sort({ created_at: -1 })
+      .limit(20 - topSongIds.length)
+      .select({ '_id': 0 })
+      .lean()
+
+    const songs = [...topSongs, ...latestSongs]
+  
+    for (let song of songs) {
+      song.artists = song.artists.length > 0 
+        ? await getArtists(song.artists) 
+        : []
+
+      song.image = song.youtube 
+        ? getYoutubeImage(song.youtube) 
+        : undefined
+    }
+
+    return res.status(200).json(songs)
+
+  } catch (err) {
+    console.error(err)
+    return next(error(500, 'something went wrong'))
+  }
 })
 
 router.get('/:uuid', async (req, res, next) => {
