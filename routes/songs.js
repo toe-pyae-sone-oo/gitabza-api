@@ -7,7 +7,7 @@ const { validateSongForm } = require('../middlewares/validations')
 const { isAdmin } = require('../middlewares/auth')
 const { error } = require('../common/errors')
 const { deepCopy } = require('../common/utils')
-const { getArtistNames, getArtists } = require('../helpers/artists')
+const { getArtists } = require('../helpers/artists')
 const { getYoutubeImage } = require('../helpers/songs')
 
 router.post('/', isAdmin, validateSongForm, async (req, res, next) => {
@@ -52,7 +52,7 @@ router.get('/', async (req, res, next) => {
       .lean()
     for (let song of songs) {
       song.artists = song.artists.length > 0 
-        ? await getArtistNames(song.artists) 
+        ? await getArtists(song.artists) 
         : []
 
       song.image = song.youtube 

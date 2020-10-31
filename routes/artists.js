@@ -3,7 +3,7 @@ const router = express.Router()
 const { v4: uuid } = require('uuid')
 const { error } = require('../common/errors')
 const { imageFilter } = require('../helpers')
-const { getArtistNames } = require('../helpers/artists')
+const { getArtists } = require('../helpers/artists')
 const { getYoutubeImage } = require('../helpers/songs')
 const { handleSingleFileUpload } = require('../middlewares/fileupload')
 const { validateArtistForm } = require('../middlewares/validations')
@@ -168,7 +168,7 @@ router.get('/:uuid/songs', async (req, res, next) => {
 
     for (let song of songs) {
       song.artists = song.artists.length > 0 
-        ? await getArtistNames(song.artists) 
+        ? await getArtists(song.artists) 
         : []
 
       song.image = song.youtube 
