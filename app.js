@@ -1,5 +1,6 @@
 'use strict'
 
+require('dotenv').config()
 require('./setup')
 require('./auth/auth')
 
@@ -30,13 +31,12 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// TODO: remove later
 // middleware to delay response
 // for testing
-app.use(async (req, res, next) => {
-  await delay(1000)
-  next()
-})
+// app.use(async (req, res, next) => {
+//   await delay(1000)
+//   next()
+// })
 
 app.use('/', indexRouter);
 app.use('/songs', songsRouter)
