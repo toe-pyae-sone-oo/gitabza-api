@@ -19,6 +19,8 @@ if (dbauthSource) {
   url += `?authSource=${dbauthSource}`
 }
 
+console.log(url)
+
 mongoose
   .connect(url, { useNewUrlParser: true })
   .then(() => console.log('connected to mongodb'))
