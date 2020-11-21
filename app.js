@@ -24,7 +24,19 @@ const { delay } = require('./common/utils')
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
-app.use(cors())
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || '').split(' ')
+
+app.use(cors({
+  origin: (origin, cb) => {
+    if (!origin) return cb(null, true)
+
+    if (allowedOrigins.indexOf(origin) == -1) {
+      const msg = `'${origin}' is not an allowed origin`
+      return cb(new Error(msg), false)
+    }
+    return cb(null, true)
+  }
+}))
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
