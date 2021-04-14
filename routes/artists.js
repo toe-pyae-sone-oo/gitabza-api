@@ -56,7 +56,7 @@ router.get('/', async (req, res) => {
     name = undefined,
   } = req.query
 
-  const _name = convertToUniIfZg(name)
+  const _name = name ? convertToUniIfZg(name) : name
 
   const count = await Artist.findByName(_name).count().exec()
 

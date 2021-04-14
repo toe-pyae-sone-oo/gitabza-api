@@ -43,7 +43,7 @@ router.get('/', async (req, res, next) => {
     genre,
   } = req.query 
   
-  const _title = convertToUniIfZg(title)
+  const _title = title ? convertToUniIfZg(title) : title
   
   try {
     const count = await Song.findByTitleAndGenre(_title, genre).count()
