@@ -15,6 +15,7 @@
     "express-form2": "^1.5.0",
     "http-errors": "~1.6.3",
     "jsonwebtoken": "^8.5.1",
+    "knayi-myscript": "^2.8.3",
     "moment": "^2.29.1",
     "mongoose": "^5.10.9",
     "morgan": "~1.9.1",

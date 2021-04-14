@@ -7,6 +7,7 @@ const { isAdmin } = require('../middlewares/auth')
 const { error } = require('../common/errors')
 const { deepCopy } = require('../common/utils')
 const { getArtists } = require('../helpers/artists')
+const { convertToUniIfZg } = require('../helpers/converter')
 const { getYoutubeImage, recordSongVisit, getTopSongs } = require('../helpers/songs')
 
 router.post('/', isAdmin, validateSongForm, async (req, res, next) => {
@@ -42,9 +43,11 @@ router.get('/', async (req, res, next) => {
     genre,
   } = req.query 
   
+  const _title = convertToUniIfZg(title)
+  
   try {
-    const count = await Song.findByTitleAndGenre(title, genre).count()
-    const songs = await Song.findByTitleAndGenre(title, genre)
+    const count = await Song.findByTitleAndGenre(_title, genre).count()
+    const songs = await Song.findByTitleAndGenre(_title, genre)
       .limit(parseInt(limit))
       .skip(parseInt(skip))
       .sort({ [sort]: order === 'asc' ? 1 : -1 })

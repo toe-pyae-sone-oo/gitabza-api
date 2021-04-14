@@ -5,6 +5,7 @@ const { error } = require('../common/errors')
 const { imageFilter } = require('../helpers')
 const { getArtists } = require('../helpers/artists')
 const { getYoutubeImage } = require('../helpers/songs')
+const { convertToUniIfZg } = require('../helpers/converter')
 const { handleSingleFileUpload } = require('../middlewares/fileupload')
 const { validateArtistForm } = require('../middlewares/validations')
 const { isAdmin } = require('../middlewares/auth')
@@ -55,10 +56,12 @@ router.get('/', async (req, res) => {
     name = undefined,
   } = req.query
 
-  const count = await Artist.findByName(name).count().exec()
+  const _name = convertToUniIfZg(name)
+
+  const count = await Artist.findByName(_name).count().exec()
 
   const artists = await Artist
-    .findByName(name)
+    .findByName(_name)
     .limit(parseInt(limit))
     .skip(parseInt(skip))
     .sort({ [sort]: order === 'asc' ? 1 : -1 })
